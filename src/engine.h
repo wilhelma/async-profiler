@@ -39,7 +39,7 @@ class Engine {
     virtual void stop();
 
     virtual int getNativeTrace(void* ucontext, int tid, const void** callchain, int max_depth,
-                               CodeCache* java_methods, CodeCache* runtime_stubs);
+                               CodeCache* java_methods, CodeCache* runtime_stubs, const void** last_pc);
 
     void enableEvents(bool enabled) {
         _enabled = enabled;

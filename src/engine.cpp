@@ -32,7 +32,7 @@ void Engine::stop() {
 }
 
 int Engine::getNativeTrace(void* ucontext, int tid, const void** callchain, int max_depth,
-                           CodeCache* java_methods, CodeCache* runtime_stubs) {
+                           CodeCache* java_methods, CodeCache* runtime_stubs, const void** last_pc) {
     const void* pc;
     uintptr_t fp;
     uintptr_t prev_fp = (uintptr_t)&fp;
@@ -73,5 +73,6 @@ int Engine::getNativeTrace(void* ucontext, int tid, const void** callchain, int 
         fp = ((uintptr_t*)fp)[0];
     }
 
+    *last_pc = pc;
     return depth;
 }

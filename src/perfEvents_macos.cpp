@@ -49,7 +49,7 @@ void PerfEvents::stop() {
 }
 
 int PerfEvents::getNativeTrace(void* ucontext, int tid, const void** callchain, int max_depth,
-                               CodeCache* java_methods, CodeCache* runtime_stubs) {
+                               CodeCache* java_methods, CodeCache* runtime_stubs, const void** last_pc) {
     return 0;
 }
 

@@ -112,6 +112,11 @@ void Profiler::addRuntimeStub(const void* address, int length, const char* name)
     _stubs_lock.lock();
     _runtime_stubs.add(address, length, name, true);
     _stubs_lock.unlock();
+
+    if (_interp_start == NULL && strcmp(name, "Interpreter") == 0) {
+        _interp_start = address;
+        _interp_end = (const char*)address + length;
+    }
 }
 
 void Profiler::onThreadStart(jvmtiEnv* jvmti, JNIEnv* jni, jthread thread) {
@@ -253,8 +258,9 @@ bool Profiler::inJavaCode(void* ucontext) {
 
 int Profiler::getNativeTrace(Engine* engine, void* ucontext, ASGCT_CallFrame* frames, int tid) {
     const void* native_callchain[MAX_NATIVE_FRAMES];
+    const void* last_pc = NULL;
     int native_frames = engine->getNativeTrace(ucontext, tid, native_callchain, MAX_NATIVE_FRAMES,
-                                               &_java_methods, &_runtime_stubs);
+                                               &_java_methods, &_runtime_stubs, &last_pc);
 
     int depth = 0;
     jmethodID prev_method = NULL;
@@ -269,6 +275,12 @@ int Profiler::getNativeTrace(Engine* engine, void* ucontext, ASGCT_CallFrame* fr
             frames[depth].method_id = prev_method = current_method;
             depth++;
         }
+    }
+
+    if (last_pc >= _interp_start && last_pc < _interp_end) {
+        frames[depth].bci = BCI_NATIVE_FRAME;
+        frames[depth].method_id = (jmethodID)"Interpreter";
+        depth++;
     }
 
     return depth;

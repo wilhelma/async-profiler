@@ -756,7 +756,7 @@ void PerfEvents::stop() {
 }
 
 int PerfEvents::getNativeTrace(void* ucontext, int tid, const void** callchain, int max_depth,
-                               CodeCache* java_methods, CodeCache* runtime_stubs) {
+                               CodeCache* java_methods, CodeCache* runtime_stubs, const void** last_pc) {
     PerfEvent* event = &_events[tid];
     if (!event->tryLock()) {
         return 0;  // the event is being destroyed
@@ -782,6 +782,7 @@ int PerfEvents::getNativeTrace(void* ucontext, int tid, const void** callchain, 
                         const void* iptr = (const void*)ip;
                         if (java_methods->contains(iptr) || runtime_stubs->contains(iptr) || depth >= max_depth) {
                             // Stop at the first Java frame
+                            *last_pc = iptr;
                             goto stack_complete;
                         }
                         callchain[depth++] = iptr;
@@ -794,6 +795,7 @@ int PerfEvents::getNativeTrace(void* ucontext, int tid, const void** callchain, 
                     // Last userspace PC is stored right after branch stack
                     const void* pc = (const void*)ring.peek(bnr * 3 + 2);
                     if (java_methods->contains(pc) || runtime_stubs->contains(pc) || depth >= max_depth) {
+                        *last_pc = pc;
                         goto stack_complete;
                     }
                     callchain[depth++] = pc;
@@ -804,11 +806,13 @@ int PerfEvents::getNativeTrace(void* ucontext, int tid, const void** callchain, 
                         ring.next();
 
                         if (java_methods->contains(to) || runtime_stubs->contains(to) || depth >= max_depth) {
+                            *last_pc = to;
                             goto stack_complete;
                         }
                         callchain[depth++] = to;
 
                         if (java_methods->contains(from) || runtime_stubs->contains(from) || depth >= max_depth) {
+                            *last_pc = from;
                             goto stack_complete;
                         }
                         callchain[depth++] = from;

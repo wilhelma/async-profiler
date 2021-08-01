@@ -103,6 +103,8 @@ class Profiler {
     SpinLock _jit_lock;
     SpinLock _stubs_lock;
     CodeCache _java_methods;
+    const void* _interp_start;
+    const void* _interp_end;
     NativeCodeCache _runtime_stubs;
     NativeCodeCache* _native_libs[MAX_NATIVE_LIBS];
     volatile int _native_lib_count;
@@ -172,6 +174,8 @@ class Profiler {
         _stubs_lock(),
         _java_methods(),
         _runtime_stubs("[stubs]"),
+        _interp_start(NULL),
+        _interp_end(NULL),
         _native_lib_count(0),
         _original_NativeLibrary_load(NULL) {
 
