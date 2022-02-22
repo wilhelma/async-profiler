@@ -333,7 +333,7 @@ Error Arguments::parse(const char* args) {
                 _reverse = true;
 
             DEFAULT()
-                msg = "Unknown argument";
+                // msg = "Unknown argument";
         }
     }
 
