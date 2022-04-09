@@ -34,9 +34,9 @@ public class FlameGraph {
     public String input;
     public String output;
 
-    private final Frame root = new Frame();
+    protected final Frame root = new Frame();
+    protected long mintotal;
     private int depth;
-    private long mintotal;
 
     public FlameGraph(String... args) {
         for (int i = 0; i < args.length; i++) {
@@ -164,7 +164,7 @@ public class FlameGraph {
         }
     }
 
-    private String stripSuffix(String title) {
+    protected String stripSuffix(String title) {
         int len = title.length();
         if (len >= 4 && title.charAt(len - 1) == ']' && title.regionMatches(len - 4, "_[", 0, 2)) {
             return title.substring(0, len - 4);
@@ -172,7 +172,7 @@ public class FlameGraph {
         return title;
     }
 
-    private int frameType(String title) {
+    protected int frameType(String title) {
         if (title.endsWith("_[j]")) {
             return 1;
         } else if (title.endsWith("_[i]")) {
